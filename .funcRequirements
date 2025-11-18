@@ -1,0 +1,185 @@
+Minimal production-like booking flow that lets users reserve cars locally (SQLite) and record a payment placeholder/status so the app can proceed without an actual payment gateway during development.
+
+1. Functional requirements
+1.1 Booking creation (dev-mode: payment optional)
+
+The app shall allow a logged-in or guest user to create a booking for a selected car.
+
+Required input: car_id, user_id (nullable for guest), start_date, end_date, pickup_location (optional), notes (optional).
+
+When the user confirms a booking in development mode, the app shall:
+
+Persist a booking record in SQLite immediately.
+
+Set booking_status = 'pending' (or 'confirmed' depending on business rule).
+
+Set payment_status = 'not_required' or payment_status = 'pending' if you also want a later payment step.
+
+Generate a unique booking_reference (e.g., GZ-20251118-0001) for tracking.
+
+1.2 Payment placeholder / simulation
+
+The app shall support a simple payment placeholder flow:
+
+Option A (recommended for dev): allow bookings with payment_status = 'not_required' so booking completes without payment.
+
+Option B: create booking with payment_status = 'pending' and provide a “Mark as Paid”/“Simulate Payment” button in the booking details (for QA/dev use).
+
+No external payment gateway integration is required in development mode.
+
+1.3 Booking confirmation UI
+
+After successful booking persistence show a confirmation screen with:
+
+Booking reference, car name, dates, total price, booking status, payment status.
+
+CTA(s): “Go to My Bookings”, “Back to Cars”, plus “Simulate Payment” if using payment_status = 'pending'.
+
+1.4 Booking management
+
+Users shall be able to view a list of their bookings (from SQLite).
+
+Each booking entry shall show booking_reference, car_name, start_date, end_date, total_price, booking_status, payment_status.
+
+Users shall be able to cancel a booking (rules below).
+
+For dev/testing, admins (or dev-only UI) shall be able to change booking and payment statuses manually.
+
+1.5 Cancellation rules (basic)
+
+A booking can be canceled by the user while its booking_status is 'pending' or 'confirmed'.
+
+Canceling updates booking_status = 'canceled' and records canceled_at timestamp.
+
+If payment_status = 'paid', mark refund_required = true (no actual refund processing in dev).
+
+1.6 Price calculation
+
+Total price = price_per_day × number_of_days (decide inclusive/exclusive days and document it).
+
+App shall compute total price at booking time and persist to the booking record.
+
+1.7 Offline-first behaviour
+
+Bookings and read operations must work offline (SQLite local).
+
+If the app later includes syncing, include synced and sync_attempts fields (optional).
+
+2. Data model (SQLite) — fields to include
+
+bookings table (minimum):
+
+id INTEGER PRIMARY KEY AUTOINCREMENT
+
+booking_reference TEXT UNIQUE
+
+user_id INTEGER NULLABLE
+
+car_id INTEGER NOT NULL
+
+start_date TEXT (ISO string)
+
+end_date TEXT (ISO string)
+
+pickup_location TEXT NULLABLE
+
+notes TEXT NULLABLE
+
+price_per_day REAL
+
+total_price REAL
+
+booking_status TEXT DEFAULT 'pending'
+
+allowed: 'pending', 'confirmed', 'canceled', 'completed'
+
+payment_status TEXT DEFAULT 'not_required'
+
+allowed: 'not_required', 'pending', 'paid', 'failed'
+
+created_at TEXT
+
+updated_at TEXT
+
+canceled_at TEXT NULLABLE
+
+synced INTEGER DEFAULT 0 (optional for future sync)
+
+users, cars tables as previously defined.
+
+3. API / service functions (local functions interacting with SQLite)
+
+Provide the following functions in your service layer:
+
+createBooking({ userId, carId, startDate, endDate, pickupLocation, notes })
+
+Validates availability (simple check: no overlapping confirmed bookings for same car)
+
+Calculates total price
+
+Inserts booking with booking_status='pending' and payment_status='not_required' or 'pending'
+
+Returns booking object
+
+getBookingsByUser(userId)
+
+getBookingById(bookingId)
+
+cancelBooking(bookingId)
+
+simulatePayment(bookingId) — dev helper that sets payment_status='paid' and optionally booking_status='confirmed'
+
+Implement these using your db.executeSql helper (from your existing setup).
+
+4. Validation & business rules
+
+Dates: end_date must be after start_date. Reject otherwise with user-facing error message.
+
+Availability check: when creating a booking, optionally check for overlapping bookings for the same car with booking_status in ['pending','confirmed'] depending on your desired strictness in dev. If you allow overlapping in dev, at least log it.
+
+Minimal booking length: enforce at least 1 day.
+
+Price rounding: persist total price as a number with cents (or KES integer).
+
+5. UX / Text guidance for development mode
+
+Book button label: Book (Dev) or Reserve to indicate dev mode if you want clarity.
+
+Confirmation message:
+“Your booking is saved. Booking reference: GZ-XXXXX. Payment: Not required (development).”
+
+If payment_status = 'pending' show a visible action: Simulate payment (for QA/dev only).
+
+Use color/labels to clearly show payment_status and booking_status on booking cards.
+
+6. Acceptance criteria (for each user story)
+
+Create booking (dev, payment optional)
+
+Given a user selects a car and valid dates, when they press Book, then a booking record is created in SQLite and the confirmation screen displays a booking reference and status.
+
+View bookings
+
+My Bookings screen shows newly created bookings with correct total price and statuses.
+
+Cancel booking
+
+Cancel button sets booking_status='canceled' and canceled_at recorded.
+
+Simulate payment (if used)
+
+Dev-only simulate button flips payment_status='paid' and updates UI.
+
+7. Testing checklist
+
+ Create booking as guest and as logged-in user.
+
+ Attempt booking with end date earlier than start date -> expect validation error.
+
+ Create overlapping bookings -> log behavior and confirm intended behavior.
+
+ Cancel booking -> check status and DB row.
+
+ Simulate payment -> check payment_status flips to 'paid'.
+
+ Inspect carhire.db file via ADB or expo SQLite debugging after actions.

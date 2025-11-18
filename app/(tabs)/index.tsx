@@ -1,98 +1,310 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { BrandFilter } from '@/components/brand-filter';
+import { GarizetuLogo } from '@/components/garizetu-logo';
+import { HorizontalCarCard } from '@/components/horizontal-car-card';
+import { useDatabase } from '@/contexts/DatabaseContext';
+import { carService } from '@/database/carService';
+import { Car } from '@/types/car';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [availableCars, setAvailableCars] = useState<Car[]>([]);
+  const [filteredCars, setFilteredCars] = useState<Car[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedBrand, setSelectedBrand] = useState('all');
+  const { isInitialized, isLoading: dbLoading } = useDatabase();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  // Load all cars
+  useEffect(() => {
+    const loadCars = async () => {
+      if (!isInitialized) {
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const cars = await carService.findAvailable();
+        setAvailableCars(cars);
+        // Set initial filtered cars
+        if (selectedBrand === 'all') {
+          setFilteredCars(cars);
+        }
+      } catch (error) {
+        console.error('Error loading cars:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCars();
+  }, [isInitialized]);
+
+  // Filter cars by brand
+  useEffect(() => {
+    const filterCarsByBrand = async () => {
+      if (!isInitialized) {
+        return;
+      }
+
+      if (selectedBrand === 'all') {
+        // Use availableCars if already loaded, otherwise load fresh
+        if (availableCars.length > 0) {
+          setFilteredCars(availableCars);
+        } else {
+          try {
+            setIsLoading(true);
+            const cars = await carService.findAvailable();
+            setFilteredCars(cars);
+          } catch (error) {
+            console.error('Error loading cars:', error);
+          } finally {
+            setIsLoading(false);
+          }
+        }
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const brandCars = await carService.findByBrand(selectedBrand);
+        setFilteredCars(brandCars);
+      } catch (error) {
+        console.error('Error filtering cars by brand:', error);
+        // Fallback to all cars on error
+        if (availableCars.length > 0) {
+          setFilteredCars(availableCars);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    filterCarsByBrand();
+  }, [selectedBrand, isInitialized]);
+
+  if (dbLoading || isLoading) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={[styles.content, styles.centerContent]}>
+          <ActivityIndicator size="large" />
+          <Text style={styles.loadingText}>Loading cars...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <View style={styles.logoContainer}>
+              <GarizetuLogo size={40} />
+              <Text style={styles.appName}>Gari Zetu</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchBar}>
+            <Ionicons name="search" size={20} color="#666" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search your dream car....."
+              placeholderTextColor="#999"
+            />
+          </View>
+          <Pressable style={styles.filterButton}>
+            <Ionicons name="options-outline" size={24} color="#000" />
+          </Pressable>
+        </View>
+
+        {/* Brands Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Brands</Text>
+          <BrandFilter selectedBrand={selectedBrand} onBrandSelect={setSelectedBrand} />
+        </View>
+
+        {/* Best Cars Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionTitle}>Best Cars</Text>
+              <Text style={styles.sectionSubtitle}>Available</Text>
+            </View>
+            <Pressable>
+              <Text style={styles.viewAllText}>View All</Text>
+            </Pressable>
+          </View>
+          <FlatList
+            data={filteredCars.slice(0, 10)}
+            renderItem={({ item }) => <HorizontalCarCard car={item} />}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.carList}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No cars found for this brand</Text>
+              </View>
+            }
+          />
+        </View>
+
+        {/* Nearby Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Nearby</Text>
+            <Pressable>
+              <Text style={styles.viewAllText}>View All</Text>
+            </Pressable>
+          </View>
+          <FlatList
+            data={filteredCars.slice(0, 5)}
+            renderItem={({ item }) => <HorizontalCarCard car={item} />}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.carList}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No cars found for this brand</Text>
+              </View>
+            }
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#FFF',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100, // Extra padding to prevent content from being hidden behind nav bar
+  },
+  content: {
+    flex: 1,
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  appName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  searchContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    gap: 12,
+    alignItems: 'center',
+  },
+  searchBar: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#000',
+  },
+  filterButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
+  },
+  viewAllText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  carList: {
+    paddingHorizontal: 16,
+  },
+  emptyContainer: {
+    width: 280,
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
   },
 });

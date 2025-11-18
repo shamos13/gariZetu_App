@@ -1,0 +1,181 @@
+✅ Car Hire Mobile Application – Requirements
+1. Overview
+
+The Car Hire Mobile App is a simple mobile application built using React Native (Expo) and JavaScript. The system allows users to view available cars, make bookings, and manage their rental experience. The backend may be provided through an API or a simple database integration.
+
+✅ 2. Functional Requirements
+2.1 User Registration & Authentication (Optional for basic version)
+
+Users should be able to create an account using email and password.
+
+Users should be able to log in and log out.
+
+Users should be able to edit their profile information.
+
+2.2 Car Listing
+
+The system shall display a list of available cars for hire.
+
+Each car shall include:
+
+Car name/model
+
+Car image
+
+Price per day
+
+Car type (SUV, Sedan, Van, etc.)
+
+Basic description
+
+2.3 Car Details Page
+
+Users should be able to tap on a car to view:
+
+Full description
+
+Price breakdown
+
+Car features (capacity, transmission, etc.)
+
+Availability
+
+2.4 Car Booking
+
+Users shall be able to:
+
+Select rental start and end dates
+
+Confirm booking
+
+View estimated total cost
+
+The app shall save the booking to the database/API.
+
+2.5 Booking Management
+
+Users shall be able to:
+
+View all their bookings
+
+Cancel a booking
+
+See booking status (pending, confirmed, completed)
+
+2.6 Notifications (Optional for basic version)
+
+The system may notify users when:
+
+Booking is confirmed
+
+Booking is canceled
+
+A car becomes available
+
+2.7 Payment (Optional for basic version)
+
+The app may allow:
+
+Mobile money simulation (e.g., M-Pesa mock)
+
+Cash-on-delivery option
+
+✅ 3. Non-Functional Requirements
+3.1 Performance
+
+The app should load car lists within 3 seconds.
+
+Navigation between screens should be smooth with minimal lag.
+
+3.2 Security
+
+Passwords must be securely handled (if authentication is included).
+
+User data should be protected through secure API communication.
+
+3.3 Usability
+
+The app should have an intuitive and visually pleasing UI.
+
+Buttons must be easy to tap (minimum 44px height).
+
+Text must be readable and appropriately sized.
+
+3.4 Scalability
+
+The app should allow for easy addition of:
+
+More car categories
+
+More detailed car attributes
+
+Additional modules like payments or GPS tracking
+
+3.5 Compatibility
+
+The application must run on:
+
+Android devices (primary target)
+
+iOS devices (optional if Expo build is used)
+
+✅ 4. Technical Requirements
+4.1 Frontend
+
+Built with React Native using Expo.
+
+Should use:
+
+React Navigation for routing
+
+Context API or Redux for state management
+
+Axios or Fetch API for backend communication
+
+Expo Image Picker (optional for profile pictures)
+
+4.2 Backend (Depending on your setup)
+
+Node.js / Spring Boot / Firebase / Supabase or any backend of your choice.
+
+REST API endpoints for:
+
+Login
+
+Register
+
+Get all cars
+
+Get single car details
+
+Create booking
+
+Get bookings by user
+
+4.3 Database
+
+SQLite / Firebase / PostgreSQL / MySQL
+
+Must store:
+
+User data
+
+Car inventory
+
+Booking records
+
+✅ 5. Deliverables
+
+Fully functional Expo mobile application
+
+Car listing screen
+
+Car details screen
+
+Booking functionality
+
+Booking management screen
+
+API integration
+
+Basic UI design
