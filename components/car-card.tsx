@@ -50,7 +50,7 @@ export function CarCard({ car }: CarCardProps) {
           <View style={styles.footer}>
             <View style={styles.priceContainer}>
               <ThemedText type="defaultSemiBold" style={styles.price}>
-                ${car.pricePerDay}
+                Ksh {car.pricePerDay.toLocaleString('en-KE')}
               </ThemedText>
               <ThemedText style={styles.priceLabel}>/day</ThemedText>
             </View>

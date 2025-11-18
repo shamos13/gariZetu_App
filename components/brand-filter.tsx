@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface Brand {
   id: string;
@@ -9,11 +9,12 @@ interface Brand {
 }
 
 const brands: Brand[] = [
-  { id: 'all', name: 'ALL', icon: 'apps' },
-  { id: 'tesla', name: 'Toyota', icon: 'flash' },
-  { id: 'lamborghini', name: 'Ford Ranger', icon: 'car-sport' },
+  { id: 'all', name: 'All', icon: 'apps' },
+  { id: 'toyota', name: 'Toyota', icon: 'car' },
+  { id: 'honda', name: 'Honda', icon: 'car-sport' },
+  { id: 'ford', name: 'Ford', icon: 'car-sport-outline' },
   { id: 'bmw', name: 'BMW', icon: 'car' },
-  { id: 'ferrari', name: 'Nissan', icon: 'car-sport' },
+  { id: 'jeep', name: 'Jeep', icon: 'compass-outline' },
 ];
 
 interface BrandFilterProps {
@@ -23,7 +24,10 @@ interface BrandFilterProps {
 
 export function BrandFilter({ selectedBrand = 'all', onBrandSelect }: BrandFilterProps) {
   return (
-    <View style={styles.container}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.container}>
       {brands.map((brand) => {
         const isSelected = selectedBrand === brand.id;
         return (
@@ -44,7 +48,7 @@ export function BrandFilter({ selectedBrand = 'all', onBrandSelect }: BrandFilte
           </Pressable>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 

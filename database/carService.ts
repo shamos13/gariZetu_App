@@ -17,6 +17,8 @@ interface CarRow {
   updatedAt?: string;
 }
 
+type CreateCarInput = Omit<Car, 'createdAt' | 'updatedAt'> & { id?: string };
+
 const mapCarRowToCar = (row: CarRow): Car => {
   return {
     id: row.id,
@@ -39,9 +41,9 @@ export const carService = {
   /**
    * Create a new car
    */
-  create: async (car: Omit<Car, 'id' | 'createdAt' | 'updatedAt'>): Promise<Car> => {
+  create: async (car: CreateCarInput): Promise<Car> => {
     const database = await getDatabase();
-    const id = `car_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = car.id ?? `car_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const now = new Date().toISOString();
 
     await database.withTransactionAsync(async () => {
@@ -208,10 +210,11 @@ export const carService = {
     
     // Map brand names to search terms
     const brandMap: Record<string, string[]> = {
-      tesla: ['tesla'],
+      toyota: ['toyota'],
+      honda: ['honda'],
+      ford: ['ford', 'ranger'],
       bmw: ['bmw'],
-      ferrari: ['ferrari'],
-      lamborghini: ['lamborghini'],
+      jeep: ['jeep'],
     };
     
     const searchTerms = brandMap[brandName.toLowerCase()] || [brandName.toLowerCase()];

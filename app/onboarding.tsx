@@ -47,19 +47,16 @@ export default function OnboardingScreen() {
         imageStyle={styles.imageStyle}>
         <View style={styles.overlay} />
         
-        {/* Logo */}
-        <View style={styles.logoContainer}>
-        <View style={styles.logoContainer}>
-              <GarizetuLogo size={40} />
-              <Text style={styles.appName}>Gari Zetu</Text>
-            </View>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <GarizetuLogo size={40} />
+            <Text style={styles.appName}>Gari Zetu</Text>
+          </View>
+          <Pressable onPress={handleSkip} style={styles.skipButton}>
+            <Text style={styles.skipText}>Skip</Text>
+          </Pressable>
         </View>
-
-    
-        {/* Skip button */}
-        <Pressable onPress={handleSkip} style={styles.skipButton}>
-          <Text style={styles.skipText}>Skip Text</Text>
-        </Pressable>
         {/* Content */}
         <View style={styles.content}>
           <Text style={styles.title}>{currentSlide.title}</Text>
@@ -115,9 +112,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     opacity: 0.7,
   },
-  logoContainer: {
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
     paddingTop: 20,
-    paddingLeft: 20,
+    zIndex: 2,
+  },
+  logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -134,10 +137,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   skipButton: {
-    position: 'absolute',
-    top: 60,
-    right: 40,
-    padding:  10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   skipText: {
     color: '#FFF',

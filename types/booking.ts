@@ -1,23 +1,37 @@
-export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
+export type BookingStatus = 'pending' | 'confirmed' | 'canceled' | 'completed';
+
+export type PaymentStatus = 'not_required' | 'pending' | 'paid' | 'failed';
 
 export interface Booking {
   id: string;
-  userId: string;
+  bookingReference: string;
+  userId: string | null;
   carId: string;
-  startDate: string; // ISO date string
-  endDate: string; // ISO date string
-  totalCost: number;
-  status: BookingStatus;
+  startDate: string;
+  endDate: string;
+  pickupLocation?: string | null;
+  notes?: string | null;
+  pricePerDay: number;
+  totalPrice: number;
+  rentalDays: number;
+  bookingStatus: BookingStatus;
+  paymentStatus: PaymentStatus;
+  refundRequired: boolean;
   createdAt: string;
   updatedAt: string;
+  canceledAt?: string | null;
+  synced?: number;
 }
 
 export interface CreateBookingInput {
-  userId: string;
+  userId?: string | null;
   carId: string;
-  startDate: string; // ISO date string
-  endDate: string; // ISO date string
-  totalCost: number;
+  startDate: string;
+  endDate: string;
+  pickupLocation?: string;
+  notes?: string;
+  paymentStatus?: PaymentStatus;
+  pricePerDay?: number;
 }
 
 export interface BookingWithCar extends Booking {

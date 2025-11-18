@@ -16,6 +16,8 @@ export default function CarDetailsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const borderColor = useThemeColor({}, 'icon');
   const tintColor = useThemeColor({}, 'tint');
+  const primaryActionColor = useThemeColor({ light: '#0a7ea4', dark: '#4DB6AC' }, 'tint');
+  const primaryActionText = useThemeColor({ light: '#FFFFFF', dark: '#0B0F10' }, 'text');
 
   useEffect(() => {
     const loadCar = async () => {
@@ -92,7 +94,7 @@ export default function CarDetailsScreen() {
                 <ThemedText style={styles.priceLabel}>Price per day</ThemedText>
                 <View style={styles.priceContainer}>
                   <ThemedText type="defaultSemiBold" style={styles.price}>
-                    ${car.pricePerDay}
+                    Ksh {car.pricePerDay.toLocaleString('en-KE')}
                   </ThemedText>
                   <ThemedText style={styles.priceUnit}>/day</ThemedText>
                 </View>
@@ -148,12 +150,22 @@ export default function CarDetailsScreen() {
             </View>
 
             <Pressable
-              style={[styles.bookButton, { backgroundColor: tintColor }]}
-              onPress={() => {
-                // TODO: Navigate to booking screen
-                alert('Booking functionality coming soon!');
-              }}>
-              <ThemedText style={styles.bookButtonText}>Book Now</ThemedText>
+              style={[
+                styles.bookButton,
+                {
+                  backgroundColor: primaryActionColor,
+                  shadowColor: primaryActionColor,
+                },
+              ]}
+              onPress={() =>
+                router.push({
+                  pathname: '/booking/new',
+                  params: { carId: car.id },
+                })
+              }>
+              <ThemedText style={[styles.bookButtonText, { color: primaryActionText }]}>
+                Reserve (Dev)
+              </ThemedText>
             </Pressable>
           </View>
         </ScrollView>
@@ -294,9 +306,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 8,
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
   },
   bookButtonText: {
-    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
   },

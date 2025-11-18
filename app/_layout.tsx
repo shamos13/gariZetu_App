@@ -21,6 +21,8 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           <Stack.Screen name="car-details" options={{ headerShown: false }} />
+          <Stack.Screen name="booking/new" options={{ headerShown: false }} />
+          <Stack.Screen name="booking/confirmation" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>

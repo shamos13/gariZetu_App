@@ -48,7 +48,7 @@ export function HorizontalCarCard({ car }: HorizontalCarCardProps) {
         </View>
         <View style={styles.locationContainer}>
           <Ionicons name="location-outline" size={14} color="#666" />
-          <Text style={styles.location}>Chicago, USA</Text>
+          <Text style={styles.location}>Eldoret, Kenya</Text>
         </View>
         <View style={styles.capacityContainer}>
           <Ionicons name="people-outline" size={14} color="#666" />
@@ -56,8 +56,8 @@ export function HorizontalCarCard({ car }: HorizontalCarCardProps) {
         </View>
         <View style={styles.footer}>
           <View style={styles.priceContainer}>
-            <Ionicons name="cash-outline" size={16} color="#000" />
-            <Text style={styles.price}>${car.pricePerDay}/Day</Text>
+          <Ionicons name="cash-outline" size={16} color="#000" />
+          <Text style={styles.price}>Ksh {car.pricePerDay.toLocaleString('en-KE')}/Day</Text>
           </View>
           <Pressable style={styles.bookButton} onPress={handlePress}>
             <Text style={styles.bookButtonText}>Book now</Text>

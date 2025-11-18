@@ -31,7 +31,9 @@ export const initDatabase = async (): Promise<void> => {
       `);
       console.log('Users table created');
 
-      // Cars table
+      // Cars table (dev-mode sync: drop to keep seed data authoritative)
+      await database.execAsync(`DROP TABLE IF EXISTS cars;`);
+
       await database.execAsync(`
         CREATE TABLE IF NOT EXISTS cars (
           id TEXT PRIMARY KEY NOT NULL,
@@ -51,19 +53,30 @@ export const initDatabase = async (): Promise<void> => {
       `);
       console.log('Cars table created');
 
-      // Bookings table
+      // Ensure latest booking schema (dev-mode: destructive reset)
+      await database.execAsync(`DROP TABLE IF EXISTS bookings;`);
+
       await database.execAsync(`
         CREATE TABLE IF NOT EXISTS bookings (
           id TEXT PRIMARY KEY NOT NULL,
-          userId TEXT NOT NULL,
+          bookingReference TEXT UNIQUE NOT NULL,
+          userId TEXT NULL,
           carId TEXT NOT NULL,
           startDate TEXT NOT NULL,
           endDate TEXT NOT NULL,
-          totalCost REAL NOT NULL,
-          status TEXT NOT NULL DEFAULT 'pending',
+          pickupLocation TEXT NULL,
+          notes TEXT NULL,
+          pricePerDay REAL NOT NULL,
+          totalPrice REAL NOT NULL,
+          rentalDays INTEGER NOT NULL,
+          bookingStatus TEXT NOT NULL DEFAULT 'pending',
+          paymentStatus TEXT NOT NULL DEFAULT 'not_required',
+          refundRequired INTEGER NOT NULL DEFAULT 0,
           createdAt TEXT NOT NULL,
           updatedAt TEXT NOT NULL,
-          FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+          canceledAt TEXT NULL,
+          synced INTEGER NOT NULL DEFAULT 0,
+          FOREIGN KEY (userId) REFERENCES users(id) ON DELETE SET NULL,
           FOREIGN KEY (carId) REFERENCES cars(id) ON DELETE CASCADE
         );
       `);
@@ -79,6 +92,21 @@ export const initDatabase = async (): Promise<void> => {
         CREATE INDEX IF NOT EXISTS idx_bookings_carId ON bookings(carId);
       `);
       console.log('Index created for bookings.carId');
+
+      await database.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_bookings_bookingReference ON bookings(bookingReference);
+      `);
+      console.log('Index created for bookings.bookingReference');
+
+      await database.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_bookings_bookingStatus ON bookings(bookingStatus);
+      `);
+      console.log('Index created for bookings.bookingStatus');
+
+      await database.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_bookings_paymentStatus ON bookings(paymentStatus);
+      `);
+      console.log('Index created for bookings.paymentStatus');
 
       await database.execAsync(`
         CREATE INDEX IF NOT EXISTS idx_cars_available ON cars(available);
