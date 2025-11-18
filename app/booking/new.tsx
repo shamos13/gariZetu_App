@@ -529,6 +529,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingRight: 8,
   },
   summaryCard: {
     borderRadius: 16,

@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 20,
     zIndex: 2,
   },
@@ -137,8 +137,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   skipButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
   skipText: {
     color: '#FFF',

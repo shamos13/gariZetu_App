@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "to-d0-list",
-    "slug": "to-d0-list",
+    "name": "Gari Zetu",
+    "slug": "gari-zetu",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "tod0list",
+    "scheme": "garizetu",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
